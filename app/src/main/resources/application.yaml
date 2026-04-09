@@ -5,7 +5,34 @@ ktor:
   deployment:
     port: 8080
 
+database:
+  jdbcUrl: "jdbc:h2:mem:foodike;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=TRUE"
+  driverClassName: "org.h2.Driver"
+  username: "sa"
+  password: ""
+  maximumPoolSize: 10
+
+redis:
+  url: "redis://127.0.0.1:6379"
+
 jwt:
-  secret: local-dev-secret
-  issuer: foodike
-  audience: foodike-clients
+  secret: "local-dev-secret"
+  issuer: "foodike"
+  audience: "foodike-clients"
+  accessExpiryMillis: 900000
+  refreshExpiryMillis: 2592000000
+
+auth:
+  otp:
+    provider: "console"
+    length: 6
+    ttlSeconds: 300
+    sendLimit: 3
+    sendWindowSeconds: 600
+    verifyFailureLimit: 5
+    verifyWindowSeconds: 900
+    blockDurationSeconds: 900
+    twilio:
+      accountSid: ""
+      authToken: ""
+      fromNumber: ""

@@ -4,6 +4,9 @@ import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import kotlinx.coroutines.Dispatchers
 import org.jetbrains.exposed.sql.Database
+import org.jetbrains.exposed.sql.SchemaUtils
+import org.jetbrains.exposed.sql.Table
+import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 
 data class DatabaseConfig(
@@ -27,6 +30,13 @@ object DatabaseFactory {
         }
 
         return Database.connect(HikariDataSource(hikariConfig))
+    }
+}
+
+fun initializeSchema(vararg tables: Table) {
+    if (tables.isEmpty()) return
+    transaction {
+        SchemaUtils.create(*tables)
     }
 }
 

@@ -1,0 +1,248 @@
+openapi: 3.0.3
+info:
+  title: Foodike Auth API
+  version: 0.1.0
+  description: |
+    Authentication endpoints currently implemented in the Foodike backend.
+servers:
+  - url: http://localhost:8080
+paths:
+  /api/v1/auth/health:
+    get:
+      summary: Auth service health
+      operationId: getAuthHealth
+      tags: [Auth]
+      responses:
+        '200':
+          description: Auth service status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+  /api/v1/auth/send-otp:
+    post:
+      summary: Send OTP to phone
+      operationId: sendOtp
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendOtpRequest'
+      responses:
+        '200':
+          description: OTP accepted for delivery
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '400':
+          description: Validation error
+        '403':
+          description: Rate limited or blocked
+  /api/v1/auth/verify-otp:
+    post:
+      summary: Verify OTP and issue tokens
+      operationId: verifyOtp
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifyOtpRequest'
+      responses:
+        '200':
+          description: Authenticated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Validation error
+        '401':
+          description: Invalid or expired OTP
+        '403':
+          description: Blocked after too many failures
+  /api/v1/auth/google:
+    post:
+      summary: Sign in with Google ID token
+      operationId: googleAuth
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GoogleAuthRequest'
+      responses:
+        '200':
+          description: Authenticated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Google auth not configured or invalid input
+  /api/v1/auth/refresh:
+    post:
+      summary: Rotate refresh token
+      operationId: refreshToken
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshTokenRequest'
+      responses:
+        '200':
+          description: New token pair
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RefreshTokenResponse'
+        '401':
+          description: Invalid refresh token or replay detected
+  /api/v1/auth/logout:
+    post:
+      summary: Logout current session
+      operationId: logout
+      tags: [Auth]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LogoutRequest'
+      responses:
+        '200':
+          description: Logged out
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '401':
+          description: Invalid bearer token or refresh token
+  /api/v1/auth/me:
+    get:
+      summary: Get current authenticated user
+      operationId: getMe
+      tags: [Auth]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Current authenticated user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          description: Invalid bearer token
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    HealthResponse:
+      type: object
+      properties:
+        service:
+          type: string
+          example: user-service
+        status:
+          type: string
+          example: ready
+      required: [service, status]
+    MessageResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: OTP sent
+      required: [message]
+    SendOtpRequest:
+      type: object
+      properties:
+        phone:
+          type: string
+          example: "+919999999999"
+      required: [phone]
+    VerifyOtpRequest:
+      type: object
+      properties:
+        phone:
+          type: string
+          example: "+919999999999"
+        otp:
+          type: string
+          example: "123456"
+      required: [phone, otp]
+    GoogleAuthRequest:
+      type: object
+      properties:
+        idToken:
+          type: string
+      required: [idToken]
+    RefreshTokenRequest:
+      type: object
+      properties:
+        refreshToken:
+          type: string
+      required: [refreshToken]
+    LogoutRequest:
+      type: object
+      properties:
+        refreshToken:
+          type: string
+      required: [refreshToken]
+    RefreshTokenResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+      required: [accessToken, refreshToken]
+    AuthResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+        user:
+          $ref: '#/components/schemas/User'
+        isNewUser:
+          type: boolean
+      required: [accessToken, refreshToken, user, isNewUser]
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        phone:
+          type: string
+          nullable: true
+        googleId:
+          type: string
+          nullable: true
+        email:
+          type: string
+          nullable: true
+        name:
+          type: string
+          nullable: true
+        avatarUrl:
+          type: string
+          nullable: true
+        role:
+          type: string
+          enum: [CUSTOMER, RESTAURANT_OWNER, ADMIN, DELIVERY]
+      required: [id, role]

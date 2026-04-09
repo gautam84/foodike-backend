@@ -2,6 +2,7 @@ package com.example.foodike
 
 import com.example.foodike.plugins.configureAuthentication
 import com.example.foodike.plugins.configureCors
+import com.example.foodike.plugins.configureInfrastructure
 import com.example.foodike.plugins.configureMonitoring
 import com.example.foodike.plugins.configureRateLimit
 import com.example.foodike.plugins.configureRouting
@@ -18,6 +19,7 @@ fun Application.module() {
     configureSerialization()
     configureMonitoring()
     configureCors()
+    configureInfrastructure()
     configureAuthentication()
     configureStatusPages()
     configureRateLimit()
