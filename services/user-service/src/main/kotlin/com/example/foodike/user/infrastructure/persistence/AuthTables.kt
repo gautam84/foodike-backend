@@ -7,7 +7,6 @@ import org.jetbrains.exposed.sql.javatime.timestamp
 object UsersTable : Table("users") {
     val id = varchar("id", 36)
     val phone = varchar("phone", 15).nullable().uniqueIndex()
-    val googleId = varchar("google_id", 100).nullable().uniqueIndex()
     val email = varchar("email", 255).nullable()
     val name = varchar("name", 100).nullable()
     val avatarUrl = text("avatar_url").nullable()

@@ -8,8 +8,11 @@ import com.example.foodike.persistence.DatabaseConfig
 import com.example.foodike.persistence.DatabaseFactory
 import com.example.foodike.persistence.initializeSchema
 import com.example.foodike.user.domain.service.AuthProperties
+import com.example.foodike.user.infrastructure.auth.GoogleSsoConfig
 import com.example.foodike.user.infrastructure.auth.OtpProviderConfig
+import com.example.foodike.user.infrastructure.persistence.AddressesTable
 import com.example.foodike.user.infrastructure.persistence.RefreshTokensTable
+import com.example.foodike.user.infrastructure.persistence.SsoIdentitiesTable
 import com.example.foodike.user.infrastructure.persistence.UsersTable
 import io.lettuce.core.RedisClient
 import io.lettuce.core.api.StatefulRedisConnection
@@ -27,7 +30,7 @@ fun Application.configureInfrastructure() {
 
     val database = initializeDatabase()
     val redisResources = initializeRedis(logger)
-    initializeSchema(UsersTable, RefreshTokensTable)
+    initializeSchema(UsersTable, RefreshTokensTable, SsoIdentitiesTable, AddressesTable)
 
     installDependencyInjection(database, redisResources)
     registerShutdownHooks(redisResources)
@@ -85,6 +88,10 @@ private fun Application.installDependencyInjection(database: Database, redisReso
         twilioAuthToken = configValue("auth.otp.twilio.authToken").ifBlank { null },
         twilioFromNumber = configValue("auth.otp.twilio.fromNumber").ifBlank { null },
     )
+    val googleSsoConfig = GoogleSsoConfig(
+        mode = configValue("auth.sso.google.mode"),
+        clientId = configValue("auth.sso.google.clientId"),
+    )
 
     install(Koin) {
         slf4jLogger()
@@ -96,6 +103,7 @@ private fun Application.installDependencyInjection(database: Database, redisReso
                     single { jwtService }
                     single { authProperties }
                     single { otpProviderConfig }
+                    single { googleSsoConfig }
                 } + listOfNotNull(
                     redisResources?.let { resources ->
                         module {

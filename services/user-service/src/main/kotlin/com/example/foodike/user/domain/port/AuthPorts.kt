@@ -1,6 +1,5 @@
 package com.example.foodike.user.domain.port
 
-import com.example.foodike.user.domain.model.GoogleProfile
 import com.example.foodike.user.domain.model.OtpChallenge
 import com.example.foodike.user.domain.model.OtpRateLimitState
 import com.example.foodike.user.domain.model.RefreshTokenRecord
@@ -10,16 +9,10 @@ interface OtpProvider {
     suspend fun sendOtp(phone: String, otp: String): Boolean
 }
 
-interface GoogleIdTokenVerifier {
-    suspend fun verify(idToken: String): GoogleProfile
-}
-
 interface UserRepository {
     suspend fun findById(id: String): User?
 
     suspend fun findByPhone(phone: String): User?
-
-    suspend fun findByGoogleId(googleId: String): User?
 
     suspend fun findByEmail(email: String): User?
 

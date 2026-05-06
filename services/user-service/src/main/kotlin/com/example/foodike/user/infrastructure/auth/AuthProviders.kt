@@ -1,8 +1,6 @@
 package com.example.foodike.user.infrastructure.auth
 
 import com.example.foodike.common.exception.ValidationException
-import com.example.foodike.user.domain.model.GoogleProfile
-import com.example.foodike.user.domain.port.GoogleIdTokenVerifier
 import com.example.foodike.user.domain.port.OtpProvider
 import java.net.URI
 import java.net.URLEncoder
@@ -19,6 +17,11 @@ data class OtpProviderConfig(
     val twilioAccountSid: String? = null,
     val twilioAuthToken: String? = null,
     val twilioFromNumber: String? = null,
+)
+
+data class GoogleSsoConfig(
+    val mode: String = "real",
+    val clientId: String = "",
 )
 
 class ConsoleOtpProvider : OtpProvider {
@@ -72,10 +75,4 @@ class TwilioOtpProvider(
 
     private fun encode(value: String): String =
         URLEncoder.encode(value, StandardCharsets.UTF_8)
-}
-
-class UnsupportedGoogleIdTokenVerifier : GoogleIdTokenVerifier {
-    override suspend fun verify(idToken: String): GoogleProfile {
-        throw ValidationException("Google sign-in is not wired yet for this environment")
-    }
 }

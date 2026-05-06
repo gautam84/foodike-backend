@@ -24,4 +24,5 @@ dependencies {
     implementation(libs.java.jwt)
     implementation(libs.bcrypt)
     implementation(libs.lettuce.core)
+    implementation(libs.google.api.client)
 }

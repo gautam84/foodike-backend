@@ -65,10 +65,42 @@ paths:
           description: Invalid or expired OTP
         '403':
           description: Blocked after too many failures
+  /api/v1/auth/sso/{provider}:
+    post:
+      summary: Sign in with an SSO ID token
+      description: |
+        Generic SSO endpoint. Currently supports `google`. Apple (`apple`) is reserved for future use.
+      operationId: ssoAuth
+      tags: [Auth]
+      parameters:
+        - in: path
+          name: provider
+          required: true
+          schema:
+            type: string
+            enum: [google, apple]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SsoAuthRequest'
+      responses:
+        '200':
+          description: Authenticated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Unsupported provider or invalid input
+        '401':
+          description: Invalid or expired ID token
   /api/v1/auth/google:
     post:
-      summary: Sign in with Google ID token
+      summary: Sign in with Google ID token (alias for /auth/sso/google)
       operationId: googleAuth
+      deprecated: true
       tags: [Auth]
       requestBody:
         required: true
@@ -84,7 +116,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/AuthResponse'
         '400':
-          description: Google auth not configured or invalid input
+          description: Invalid input
+        '401':
+          description: Invalid or expired ID token
   /api/v1/auth/refresh:
     post:
       summary: Rotate refresh token
@@ -143,6 +177,178 @@ paths:
                 $ref: '#/components/schemas/User'
         '401':
           description: Invalid bearer token
+  /api/v1/users/me:
+    get:
+      summary: Get profile of current user
+      operationId: getProfile
+      tags: [Users]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Authenticated user profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfileResponse'
+        '401':
+          description: Invalid bearer token
+    patch:
+      summary: Update profile fields (name, email, avatarUrl)
+      description: |
+        Pass only the fields you want to change. Empty string clears a field; null/omitted leaves it unchanged.
+      operationId: updateProfile
+      tags: [Users]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProfileRequest'
+      responses:
+        '200':
+          description: Updated profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfileResponse'
+        '400':
+          description: Validation error
+        '401':
+          description: Invalid bearer token
+        '409':
+          description: Email already in use
+  /api/v1/users/me/addresses:
+    get:
+      summary: List addresses for current user
+      operationId: listAddresses
+      tags: [Addresses]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: All addresses; default first
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddressListResponse'
+        '401':
+          description: Invalid bearer token
+    post:
+      summary: Create an address
+      operationId: createAddress
+      tags: [Addresses]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAddressRequest'
+      responses:
+        '201':
+          description: Address created. First address auto-marks default.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddressResponse'
+        '400':
+          description: Validation error
+        '401':
+          description: Invalid bearer token
+  /api/v1/users/me/addresses/{id}:
+    get:
+      summary: Fetch a single address
+      operationId: getAddress
+      tags: [Addresses]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Address
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddressResponse'
+        '404':
+          description: Address not found or not owned by current user
+    patch:
+      summary: Update an address
+      operationId: updateAddress
+      tags: [Addresses]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateAddressRequest'
+      responses:
+        '200':
+          description: Updated address
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddressResponse'
+        '400':
+          description: Validation error
+        '404':
+          description: Address not found
+    delete:
+      summary: Delete an address
+      operationId: deleteAddress
+      tags: [Addresses]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Deleted. If this was the default, no address remains default.
+        '404':
+          description: Address not found
+  /api/v1/users/me/addresses/{id}/default:
+    post:
+      summary: Mark an address as the default
+      operationId: setDefaultAddress
+      tags: [Addresses]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Address with isDefault=true; all other addresses for the user unset.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddressResponse'
+        '404':
+          description: Address not found
 components:
   securitySchemes:
     bearerAuth:
@@ -190,6 +396,12 @@ components:
         idToken:
           type: string
       required: [idToken]
+    SsoAuthRequest:
+      type: object
+      properties:
+        idToken:
+          type: string
+      required: [idToken]
     RefreshTokenRequest:
       type: object
       properties:
@@ -230,7 +442,25 @@ components:
         phone:
           type: string
           nullable: true
-        googleId:
+        email:
+          type: string
+          nullable: true
+        name:
+          type: string
+          nullable: true
+        avatarUrl:
+          type: string
+          nullable: true
+        role:
+          type: string
+          enum: [CUSTOMER, RESTAURANT_OWNER, ADMIN, DELIVERY]
+      required: [id, role]
+    UserProfileResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        phone:
           type: string
           nullable: true
         email:
@@ -245,4 +475,123 @@ components:
         role:
           type: string
           enum: [CUSTOMER, RESTAURANT_OWNER, ADMIN, DELIVERY]
-      required: [id, role]
+        ssoProviders:
+          type: array
+          items:
+            type: string
+            enum: [GOOGLE, APPLE]
+      required: [id, role, ssoProviders]
+    UpdateProfileRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          nullable: true
+        email:
+          type: string
+          nullable: true
+        avatarUrl:
+          type: string
+          nullable: true
+    AddressResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        label:
+          type: string
+        line1:
+          type: string
+        line2:
+          type: string
+          nullable: true
+        city:
+          type: string
+        state:
+          type: string
+        postalCode:
+          type: string
+        country:
+          type: string
+          description: ISO 3166-1 alpha-2 code (e.g., IN, US)
+        latitude:
+          type: number
+          nullable: true
+        longitude:
+          type: number
+          nullable: true
+        isDefault:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required: [id, label, line1, city, state, postalCode, country, isDefault, createdAt, updatedAt]
+    AddressListResponse:
+      type: object
+      properties:
+        addresses:
+          type: array
+          items:
+            $ref: '#/components/schemas/AddressResponse'
+      required: [addresses]
+    CreateAddressRequest:
+      type: object
+      properties:
+        label:
+          type: string
+        line1:
+          type: string
+        line2:
+          type: string
+          nullable: true
+        city:
+          type: string
+        state:
+          type: string
+        postalCode:
+          type: string
+        country:
+          type: string
+        latitude:
+          type: number
+          nullable: true
+        longitude:
+          type: number
+          nullable: true
+        isDefault:
+          type: boolean
+          nullable: true
+      required: [label, line1, city, state, postalCode, country]
+    UpdateAddressRequest:
+      type: object
+      properties:
+        label:
+          type: string
+          nullable: true
+        line1:
+          type: string
+          nullable: true
+        line2:
+          type: string
+          nullable: true
+        city:
+          type: string
+          nullable: true
+        state:
+          type: string
+          nullable: true
+        postalCode:
+          type: string
+          nullable: true
+        country:
+          type: string
+          nullable: true
+        latitude:
+          type: number
+          nullable: true
+        longitude:
+          type: number
+          nullable: true

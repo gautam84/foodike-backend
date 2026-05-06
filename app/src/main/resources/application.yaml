@@ -36,3 +36,7 @@ auth:
       accountSid: "${TWILIO_ACCOUNT_SID:}"
       authToken: "${TWILIO_AUTH_TOKEN:}"
       fromNumber: "${TWILIO_FROM_NUMBER:}"
+  sso:
+    google:
+      mode: "${AUTH_SSO_GOOGLE_MODE:stub}"
+      clientId: "${GOOGLE_OAUTH_CLIENT_ID:}"

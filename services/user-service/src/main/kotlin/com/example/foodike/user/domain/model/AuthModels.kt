@@ -31,10 +31,3 @@ data class RefreshTokenRecord(
     val expiresAt: Instant,
     val createdAt: Instant,
 )
-
-data class GoogleProfile(
-    val subject: String,
-    val email: String?,
-    val name: String?,
-    val picture: String?,
-)

@@ -24,9 +24,6 @@ class InMemoryUserRepository : UserRepository {
     override suspend fun findByPhone(phone: String): User? =
         mutex.withLock { users.values.firstOrNull { it.phone == phone } }
 
-    override suspend fun findByGoogleId(googleId: String): User? =
-        mutex.withLock { users.values.firstOrNull { it.googleId == googleId } }
-
     override suspend fun findByEmail(email: String): User? =
         mutex.withLock { users.values.firstOrNull { it.email.equals(email, ignoreCase = true) } }
 

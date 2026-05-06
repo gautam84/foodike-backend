@@ -10,6 +10,7 @@ import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insert
+import org.jetbrains.exposed.sql.lowerCase
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.update
 
@@ -32,20 +33,11 @@ class ExposedUserRepository : UserRepository {
                 ?.toUser()
         }
 
-    override suspend fun findByGoogleId(googleId: String): User? =
-        dbQuery {
-            UsersTable
-                .selectAll()
-                .where { UsersTable.googleId eq googleId }
-                .singleOrNull()
-                ?.toUser()
-        }
-
     override suspend fun findByEmail(email: String): User? =
         dbQuery {
             UsersTable
                 .selectAll()
-                .where { UsersTable.email eq email }
+                .where { UsersTable.email.lowerCase() eq email.lowercase() }
                 .singleOrNull()
                 ?.toUser()
         }
@@ -61,7 +53,6 @@ class ExposedUserRepository : UserRepository {
                 UsersTable.insert {
                     it[id] = user.id
                     it[phone] = user.phone
-                    it[googleId] = user.googleId
                     it[email] = user.email
                     it[name] = user.name
                     it[avatarUrl] = user.avatarUrl
@@ -73,7 +64,6 @@ class ExposedUserRepository : UserRepository {
             } else {
                 UsersTable.update({ UsersTable.id eq user.id }) {
                     it[phone] = user.phone
-                    it[googleId] = user.googleId
                     it[email] = user.email
                     it[name] = user.name
                     it[avatarUrl] = user.avatarUrl
@@ -121,7 +111,6 @@ private fun ResultRow.toUser() =
     User(
         id = this[UsersTable.id],
         phone = this[UsersTable.phone],
-        googleId = this[UsersTable.googleId],
         email = this[UsersTable.email],
         name = this[UsersTable.name],
         avatarUrl = this[UsersTable.avatarUrl],

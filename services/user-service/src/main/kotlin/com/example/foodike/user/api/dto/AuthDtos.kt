@@ -20,6 +20,11 @@ data class GoogleAuthRequest(
 )
 
 @Serializable
+data class SsoAuthRequest(
+    val idToken: String,
+)
+
+@Serializable
 data class RefreshTokenRequest(
     val refreshToken: String,
 )
