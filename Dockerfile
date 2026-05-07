@@ -1,23 +1,27 @@
 # syntax=docker/dockerfile:1.7
 
-FROM gradle:8.10-jdk17 AS build
-WORKDIR /home/gradle/project
+FROM eclipse-temurin:17-jdk-jammy AS build
+WORKDIR /workspace
+ENV GRADLE_USER_HOME=/root/.gradle
 
-COPY --chown=gradle:gradle settings.gradle.kts build.gradle.kts gradle.properties ./
-COPY --chown=gradle:gradle gradle ./gradle
-COPY --chown=gradle:gradle app/build.gradle.kts ./app/
-COPY --chown=gradle:gradle shared ./shared
-COPY --chown=gradle:gradle services ./services
-COPY --chown=gradle:gradle tests/build.gradle.kts ./tests/
+COPY gradlew ./
+COPY gradle ./gradle
+RUN chmod +x gradlew
 
-RUN --mount=type=cache,target=/home/gradle/.gradle \
-    gradle --no-daemon :app:dependencies > /dev/null 2>&1 || true
+COPY settings.gradle.kts build.gradle.kts gradle.properties* ./
+COPY app/build.gradle.kts ./app/
+COPY shared ./shared
+COPY services ./services
+COPY tests/build.gradle.kts ./tests/
 
-COPY --chown=gradle:gradle app ./app
-COPY --chown=gradle:gradle tests ./tests
+RUN --mount=type=cache,target=/root/.gradle \
+    ./gradlew --no-daemon :app:dependencies > /dev/null 2>&1 || true
 
-RUN --mount=type=cache,target=/home/gradle/.gradle \
-    gradle --no-daemon :app:buildFatJar -x test
+COPY app ./app
+COPY tests ./tests
+
+RUN --mount=type=cache,target=/root/.gradle \
+    ./gradlew --no-daemon :app:buildFatJar -x test
 
 FROM eclipse-temurin:17-jre-jammy AS runtime
 WORKDIR /app
@@ -25,7 +29,7 @@ WORKDIR /app
 RUN groupadd --system --gid 1001 foodike \
  && useradd  --system --uid 1001 --gid foodike --home-dir /app --shell /usr/sbin/nologin foodike
 
-COPY --from=build /home/gradle/project/app/build/libs/*-all.jar /app/app.jar
+COPY --from=build /workspace/app/build/libs/*-all.jar /app/app.jar
 
 USER foodike
 EXPOSE 8080
