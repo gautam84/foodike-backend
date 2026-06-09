@@ -7,6 +7,11 @@ import com.example.foodike.di.serviceModules
 import com.example.foodike.persistence.DatabaseConfig
 import com.example.foodike.persistence.DatabaseFactory
 import com.example.foodike.persistence.initializeSchema
+import com.example.foodike.restaurant.infrastructure.persistence.MenuCategoriesTable
+import com.example.foodike.restaurant.infrastructure.persistence.MenuItemsTable
+import com.example.foodike.restaurant.infrastructure.persistence.RestaurantHoursTable
+import com.example.foodike.restaurant.infrastructure.persistence.RestaurantsTable
+import com.example.foodike.restaurant.infrastructure.persistence.ReviewsTable
 import com.example.foodike.user.domain.service.AuthProperties
 import com.example.foodike.user.infrastructure.auth.GoogleSsoConfig
 import com.example.foodike.user.infrastructure.auth.OtpProviderConfig
@@ -30,7 +35,17 @@ fun Application.configureInfrastructure() {
 
     val database = initializeDatabase()
     val redisResources = initializeRedis(logger)
-    initializeSchema(UsersTable, RefreshTokensTable, SsoIdentitiesTable, AddressesTable)
+    initializeSchema(
+        UsersTable,
+        RefreshTokensTable,
+        SsoIdentitiesTable,
+        AddressesTable,
+        RestaurantsTable,
+        RestaurantHoursTable,
+        MenuCategoriesTable,
+        MenuItemsTable,
+        ReviewsTable,
+    )
 
     installDependencyInjection(database, redisResources)
     registerShutdownHooks(redisResources)

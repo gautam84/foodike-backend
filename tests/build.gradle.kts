@@ -8,6 +8,7 @@ kotlin {
 
 dependencies {
     testImplementation(project(":app"))
+    testImplementation(project(":shared:auth"))
     testImplementation(project(":services:user-service"))
     testImplementation(libs.ktor.server.test.host)
     testImplementation(libs.ktor.server.config.yaml)
