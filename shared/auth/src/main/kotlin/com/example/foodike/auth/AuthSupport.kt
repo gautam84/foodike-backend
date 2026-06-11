@@ -3,9 +3,12 @@ package com.example.foodike.auth
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.auth0.jwt.interfaces.DecodedJWT
+import com.example.foodike.common.model.ErrorResponse
+import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
 import io.ktor.server.auth.authentication
 import io.ktor.server.auth.jwt.jwt
+import io.ktor.server.response.respond
 import java.util.Date
 import java.util.UUID
 import kotlinx.serialization.Serializable
@@ -91,6 +94,12 @@ fun Application.installJwtAuthentication(jwtService: JwtService, config: JwtConf
                 } else {
                     null
                 }
+            }
+            challenge { _, _ ->
+                call.respond(
+                    HttpStatusCode.Unauthorized,
+                    ErrorResponse(code = "UNAUTHORIZED", message = "Missing or invalid access token"),
+                )
             }
         }
     }
