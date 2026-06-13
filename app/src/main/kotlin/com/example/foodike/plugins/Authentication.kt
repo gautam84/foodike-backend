@@ -7,6 +7,10 @@ import com.example.foodike.di.serviceModules
 import com.example.foodike.persistence.DatabaseConfig
 import com.example.foodike.persistence.DatabaseFactory
 import com.example.foodike.persistence.initializeSchema
+import com.example.foodike.order.infrastructure.persistence.CartItemsTable
+import com.example.foodike.order.infrastructure.persistence.CartsTable
+import com.example.foodike.order.infrastructure.persistence.OrderItemsTable
+import com.example.foodike.order.infrastructure.persistence.OrdersTable
 import com.example.foodike.restaurant.infrastructure.persistence.MenuCategoriesTable
 import com.example.foodike.restaurant.infrastructure.persistence.MenuItemsTable
 import com.example.foodike.restaurant.infrastructure.persistence.RestaurantHoursTable
@@ -45,6 +49,10 @@ fun Application.configureInfrastructure() {
         MenuCategoriesTable,
         MenuItemsTable,
         ReviewsTable,
+        CartsTable,
+        CartItemsTable,
+        OrdersTable,
+        OrderItemsTable,
     )
 
     installDependencyInjection(database, redisResources)
