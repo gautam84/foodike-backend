@@ -17,6 +17,7 @@ import com.example.foodike.restaurant.infrastructure.persistence.MenuItemsTable
 import com.example.foodike.restaurant.infrastructure.persistence.RestaurantHoursTable
 import com.example.foodike.restaurant.infrastructure.persistence.RestaurantsTable
 import com.example.foodike.restaurant.infrastructure.persistence.ReviewsTable
+import com.example.foodike.tracking.infrastructure.persistence.TrackingSessionsTable
 import com.example.foodike.user.domain.service.AuthProperties
 import com.example.foodike.user.infrastructure.auth.GoogleSsoConfig
 import com.example.foodike.user.infrastructure.auth.OtpProviderConfig
@@ -55,6 +56,7 @@ fun Application.configureInfrastructure() {
         OrdersTable,
         OrderItemsTable,
         NotificationsTable,
+        TrackingSessionsTable,
     )
 
     installDependencyInjection(database, redisResources)

@@ -96,3 +96,14 @@ object NotificationEvents {
         },
     )
 }
+
+object TrackingEvents {
+    fun deliveryStatusChanged(orderId: String, status: String, userId: String) = EventEnvelope(
+        type = "delivery.status_changed",
+        payload = buildJsonObject {
+            put("orderId", orderId)
+            put("status", status)
+            put("userId", userId)
+        },
+    )
+}

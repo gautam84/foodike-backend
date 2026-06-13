@@ -10,6 +10,7 @@ import com.example.foodike.plugins.configureSerialization
 import com.example.foodike.plugins.configureStatusPages
 import com.example.foodike.plugins.configureWebSockets
 import com.example.foodike.plugins.startNotificationConsumer
+import com.example.foodike.plugins.startTrackingConsumer
 import io.ktor.server.application.Application
 
 fun main(args: Array<String>) {
@@ -23,6 +24,7 @@ fun Application.module() {
     configureInfrastructure()
     configureAuthentication()
     startNotificationConsumer()
+    startTrackingConsumer()
     configureStatusPages()
     configureRateLimit()
     configureWebSockets()
