@@ -9,6 +9,7 @@ import com.example.foodike.plugins.configureRouting
 import com.example.foodike.plugins.configureSerialization
 import com.example.foodike.plugins.configureStatusPages
 import com.example.foodike.plugins.configureWebSockets
+import com.example.foodike.plugins.startNotificationConsumer
 import io.ktor.server.application.Application
 
 fun main(args: Array<String>) {
@@ -21,6 +22,7 @@ fun Application.module() {
     configureCors()
     configureInfrastructure()
     configureAuthentication()
+    startNotificationConsumer()
     configureStatusPages()
     configureRateLimit()
     configureWebSockets()

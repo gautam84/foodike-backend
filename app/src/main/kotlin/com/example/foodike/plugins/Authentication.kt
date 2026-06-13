@@ -7,6 +7,7 @@ import com.example.foodike.di.serviceModules
 import com.example.foodike.persistence.DatabaseConfig
 import com.example.foodike.persistence.DatabaseFactory
 import com.example.foodike.persistence.initializeSchema
+import com.example.foodike.notification.infrastructure.persistence.NotificationsTable
 import com.example.foodike.order.infrastructure.persistence.CartItemsTable
 import com.example.foodike.order.infrastructure.persistence.CartsTable
 import com.example.foodike.order.infrastructure.persistence.OrderItemsTable
@@ -53,6 +54,7 @@ fun Application.configureInfrastructure() {
         CartItemsTable,
         OrdersTable,
         OrderItemsTable,
+        NotificationsTable,
     )
 
     installDependencyInjection(database, redisResources)
