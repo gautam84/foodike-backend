@@ -14,6 +14,7 @@ enum class NotificationChannel {
 enum class NotificationType {
     WELCOME,
     ORDER_PLACED,
+    PAYMENT_VERIFIED,
     GENERIC,
 }
 

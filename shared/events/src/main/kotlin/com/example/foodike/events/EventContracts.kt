@@ -78,11 +78,12 @@ object OrderEvents {
 }
 
 object PaymentEvents {
-    fun paymentVerified(paymentId: String, orderId: String) = EventEnvelope(
+    fun paymentVerified(paymentId: String, orderId: String, userId: String) = EventEnvelope(
         type = "payment.verified",
         payload = buildJsonObject {
             put("paymentId", paymentId)
             put("orderId", orderId)
+            put("userId", userId)
         },
     )
 }
