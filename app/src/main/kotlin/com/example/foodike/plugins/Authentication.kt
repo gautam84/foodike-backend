@@ -12,6 +12,8 @@ import com.example.foodike.order.infrastructure.persistence.CartItemsTable
 import com.example.foodike.order.infrastructure.persistence.CartsTable
 import com.example.foodike.order.infrastructure.persistence.OrderItemsTable
 import com.example.foodike.order.infrastructure.persistence.OrdersTable
+import com.example.foodike.payment.infrastructure.gateway.RazorpayConfig
+import com.example.foodike.payment.infrastructure.persistence.PaymentsTable
 import com.example.foodike.restaurant.infrastructure.persistence.MenuCategoriesTable
 import com.example.foodike.restaurant.infrastructure.persistence.MenuItemsTable
 import com.example.foodike.restaurant.infrastructure.persistence.RestaurantHoursTable
@@ -57,6 +59,7 @@ fun Application.configureInfrastructure() {
         OrderItemsTable,
         NotificationsTable,
         TrackingSessionsTable,
+        PaymentsTable,
     )
 
     installDependencyInjection(database, redisResources)
@@ -119,6 +122,11 @@ private fun Application.installDependencyInjection(database: Database, redisReso
         mode = configValue("auth.sso.google.mode"),
         clientId = configValue("auth.sso.google.clientId"),
     )
+    val razorpayConfig = RazorpayConfig(
+        mode = configValue("payments.razorpay.mode"),
+        keyId = configValue("payments.razorpay.keyId"),
+        keySecret = configValue("payments.razorpay.keySecret"),
+    )
 
     install(Koin) {
         slf4jLogger()
@@ -131,6 +139,7 @@ private fun Application.installDependencyInjection(database: Database, redisReso
                     single { authProperties }
                     single { otpProviderConfig }
                     single { googleSsoConfig }
+                    single { razorpayConfig }
                 } + listOfNotNull(
                     redisResources?.let { resources ->
                         module {

@@ -57,7 +57,18 @@ class NotificationEventConsumer(
                     body = "We've received your order${orderId?.let { " #$it" } ?: ""}. You'll be notified as it progresses.",
                 )
             }
-            // payment.verified carries no userId yet — see NotificationEventConsumer plan note.
+
+            "payment.verified" -> {
+                val userId = envelope.string("userId") ?: return
+                val orderId = envelope.string("orderId")
+                service.notify(
+                    userId = userId,
+                    type = NotificationType.PAYMENT_VERIFIED,
+                    channel = NotificationChannel.PUSH,
+                    title = "Payment successful",
+                    body = "Your payment${orderId?.let { " for order #$it" } ?: ""} was received. Your order is confirmed.",
+                )
+            }
         }
     }
 
